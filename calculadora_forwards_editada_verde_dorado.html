@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora de Forwards</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background-color: #e8f5e9; /* verde pastel */
+    }
+
+    h1 {
+        text-align: center;
+        color: #2e7d32; /* verde más fuerte */
+    }
+
+    h2 {
+        color: #33691e;
+    }
+
+    .section {
+        background: #f1f8e9; /* verde muy claro */
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        border-left: 6px solid #c6a75e; /* dorado */
+    }
+
+    input {
+        margin: 5px 0;
+        padding: 8px;
+        width: 100%;
+        border-radius: 5px;
+        border: 1px solid #c8e6c9;
+    }
+
+    button {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #c6a75e; /* dorado */
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background-color: #b7954d; /* dorado oscuro */
+    }
+
+    .result {
+        margin-top: 10px;
+        font-weight: bold;
+        color: #1b5e20;
+    }
+
+    .error {
+        color: #b71c1c;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+
+function validarNumeros(valores){
+    for(let i=0; i<valores.length; i++){
+        if(isNaN(valores[i]) || valores[i] === ""){
+            return false;
+        }
+    }
+    return true;
+}
+
+function forwardDivisas() {
+    let S0 = parseFloat(document.getElementById("S0_fx").value);
+    let rMXN = parseFloat(document.getElementById("rMXN").value);
+    let rUSD = parseFloat(document.getElementById("rUSD").value);
+    let T = parseFloat(document.getElementById("T_fx").value);
+
+    if(!validarNumeros([S0, rMXN, rUSD, T])){
+        document.getElementById("result_fx").innerHTML = "⚠️ Verifica los datos (usar decimales y no dejar campos vacíos)";
+        return;
+    }
+
+    let F0 = S0 * Math.exp((rMXN - rUSD) * T);
+    document.getElementById("result_fx").innerHTML = "Forward = " + F0.toFixed(4);
+}
+
+function forwardSinIngresos() {
+    let S0 = parseFloat(document.getElementById("S0_noinc").value);
+    let r = parseFloat(document.getElementById("r_noinc").value);
+    let T = parseFloat(document.getElementById("T_noinc").value);
+
+    if(!validarNumeros([S0, r, T])){
+        document.getElementById("result_noinc").innerHTML = "⚠️ Verifica los datos";
+        return;
+    }
+
+    let F0 = S0 * Math.exp(r * T);
+    document.getElementById("result_noinc").innerHTML = "Forward = " + F0.toFixed(4);
+}
+
+function forwardConIngresos() {
+    let S0 = parseFloat(document.getElementById("S0_inc").value);
+    let PV = parseFloat(document.getElementById("PV_inc").value);
+    let r = parseFloat(document.getElementById("r_inc").value);
+    let T = parseFloat(document.getElementById("T_inc").value);
+
+    if(!validarNumeros([S0, PV, r, T])){
+        document.getElementById("result_inc").innerHTML = "⚠️ Verifica los datos";
+        return;
+    }
+
+    let F0 = (S0 - PV) * Math.exp(r * T);
+    document.getElementById("result_inc").innerHTML = "Forward = " + F0.toFixed(4);
+}
+
+function FRA() {
+    let F = parseFloat(document.getElementById("F_fra").value);
+    let K = parseFloat(document.getElementById("K_fra").value);
+    let L = parseFloat(document.getElementById("L_fra").value);
+    let T = parseFloat(document.getElementById("T_fra").value);
+    let r = parseFloat(document.getElementById("r_fra").value);
+
+    if(!validarNumeros([F, K, L, T, r])){
+        document.getElementById("result_fra").innerHTML = "⚠️ Verifica los datos";
+        return;
+    }
+
+    let value = (F - K) * L * T * Math.exp(-r * T);
+    document.getElementById("result_fra").innerHTML = "Valor FRA ≈ " + value.toFixed(4);
+}
+
+</script>
+</head>
+
+<body>
+
+<h1>Calculadora de Forwards</h1>
+
+<div class="section">
+<h2>1) Forward de Divisas (USD/MXN)</h2>
+<input id="S0_fx" placeholder="S0 (Spot hoy)">
+<input id="rMXN" placeholder="r_MXN (decimal)">
+<input id="rUSD" placeholder="r_USD (decimal)">
+<input id="T_fx" placeholder="T (años)">
+<button onclick="forwardDivisas()">Calcular</button>
+<div class="result" id="result_fx"></div>
+</div>
+
+<div class="section">
+<h2>2) Forward sin ingresos</h2>
+<input id="S0_noinc" placeholder="S0 (Spot hoy)">
+<input id="r_noinc" placeholder="r (decimal)">
+<input id="T_noinc" placeholder="T (años)">
+<button onclick="forwardSinIngresos()">Calcular</button>
+<div class="result" id="result_noinc"></div>
+</div>
+
+<div class="section">
+<h2>3) Forward con ingresos (dividendos)</h2>
+<input id="S0_inc" placeholder="S0 (Spot hoy)">
+<input id="PV_inc" placeholder="PV(D) (Valor presente dividendos)">
+<input id="r_inc" placeholder="r (decimal)">
+<input id="T_inc" placeholder="T (años)">
+<button onclick="forwardConIngresos()">Calcular</button>
+<div class="result" id="result_inc"></div>
+</div>
+
+<div class="section">
+<h2>4) Forward Rate Agreement (FRA)</h2>
+<input id="F_fra" placeholder="F (tasa forward mercado)">
+<input id="K_fra" placeholder="K (tasa pactada)">
+<input id="L_fra" placeholder="L (monto nocional)">
+<input id="T_fra" placeholder="T (años)">
+<input id="r_fra" placeholder="r (tasa descuento)">
+<button onclick="FRA()">Calcular</button>
+<div class="result" id="result_fra"></div>
+</div>
+
+</body>
+</html>
